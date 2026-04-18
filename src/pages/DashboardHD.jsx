@@ -106,6 +106,10 @@ const DashboardHD = ({ user }) => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isMrSearchModalOpen, setIsMrSearchModalOpen] = useState(false);
+  const [mrSearchTerm, setMrSearchTerm] = useState('');
+  const [mrHistoryResults, setMrHistoryResults] = useState([]);
+  const [mrSearchLoading, setMrSearchLoading] = useState(false);
   const { message, modal } = App.useApp();
   const [form] = Form.useForm();
   const [activeTab, setActiveTab] = useState('1');
@@ -309,6 +313,7 @@ const DashboardHD = ({ user }) => {
 
     // Form Resets
     saferResetFields(form);
+    form.setFieldsValue({ tgl_periksa: dayjs() });
     saferResetFields(assAwalForm);
     saferResetFields(monForm);
     saferResetFields(monItemForm);
@@ -349,11 +354,14 @@ const DashboardHD = ({ user }) => {
     fetchDokter();
 
     const handleOpenSearch = () => setIsSearchModalOpen(true);
+    const handleOpenMrSearch = () => setIsMrSearchModalOpen(true);
     const handleOpenPPA = () => setIsPPAModalOpen(true);
     window.addEventListener('open-patient-search', handleOpenSearch);
+    window.addEventListener('open-mr-search', handleOpenMrSearch);
     window.addEventListener('open-ppa-modal', handleOpenPPA);
     return () => {
       window.removeEventListener('open-patient-search', handleOpenSearch);
+      window.removeEventListener('open-mr-search', handleOpenMrSearch);
       window.removeEventListener('open-ppa-modal', handleOpenPPA);
     };
   }, []);
@@ -442,6 +450,7 @@ const DashboardHD = ({ user }) => {
 
     form.setFieldsValue({
       ...record,
+      tgl_periksa: record.tgl_periksa ? dayjs(record.tgl_periksa) : dayjs(),
       objektif: cleanObjektif,
       // Populasis extra fields if available in record
       // (Backend provides them separately in ass_ralan)
@@ -743,6 +752,20 @@ const DashboardHD = ({ user }) => {
     } catch (e) { }
   };
 
+  const fetchHistoryByMr = async () => {
+    if (!mrSearchTerm) return;
+    setMrSearchLoading(true);
+    try {
+      const resp = await axios.get(`${API_BASE}/pasien-by-mr/${mrSearchTerm}`);
+      setMrHistoryResults(resp.data.data);
+    } catch (error) {
+      console.error(error);
+      message.error("Gagal mengambil riwayat pasien");
+    } finally {
+      setMrSearchLoading(false);
+    }
+  };
+
   const handleSelectPatient = async (patient) => {
     setSwitchingPatient(true);
     setSelectedPatient(null);
@@ -961,6 +984,7 @@ const DashboardHD = ({ user }) => {
             tindakan_hd_ke: values.tindakan_hd_ke || null,
             akses_vaskuler: values.akses_vaskuler || null,
             tanda_infeksi: values.tanda_infeksi || null,
+            tgl_periksa: values.tgl_periksa ? values.tgl_periksa.format('YYYY-MM-DD HH:mm:ss') : null,
             egfr: values.egfr || null,
             user_id: user?.nama || null,
             // Fallback for mandatory fields
@@ -2486,6 +2510,18 @@ const DashboardHD = ({ user }) => {
                     return (
                       <div className="space-y-4">
                         <Form form={form} layout="vertical" onFinish={onFinishSoap} autoComplete="off">
+
+                          {/* Date of Examination */}
+                          <div className="flex justify-end mb-4">
+                            <Form.Item 
+                              label={<span className="text-[11px] font-bold text-gray-500 uppercase">Tanggal & Jam Periksa</span>} 
+                              name="tgl_periksa" 
+                              className="mb-0"
+                              initialValue={dayjs()}
+                            >
+                              <DatePicker showTime format="DD/MM/YYYY HH:mm" size="small" className="rounded-lg border-indigo-200" />
+                            </Form.Item>
+                          </div>
 
                           {/* ── Tanda Vital & Data HD ── */}
                           {isDokter && (
@@ -4169,6 +4205,90 @@ const DashboardHD = ({ user }) => {
               setIsSearchModalOpen(false);
             }
           })}
+        />
+      </Modal>
+
+      {/* MR Search Modal */}
+      <Modal
+        title={
+          <Flex justify="space-between" align="center" className="pr-8">
+            <span>Cari Berdasarkan No RM (Riwayat REGISTER)</span>
+          </Flex>
+        }
+        open={isMrSearchModalOpen}
+        onCancel={() => {
+          setIsMrSearchModalOpen(false);
+          setMrSearchTerm('');
+          setMrHistoryResults([]);
+        }}
+        footer={null}
+        width={850}
+        destroyOnHidden
+      >
+        <div className="mb-4">
+          <Input.Search
+            placeholder="Masukkan No RM (Contoh: 00123456)..."
+            enterButton="Cari Riwayat"
+            size="large"
+            value={mrSearchTerm}
+            onChange={e => setMrSearchTerm(e.target.value)}
+            onSearch={fetchHistoryByMr}
+            loading={mrSearchLoading}
+            autoFocus
+          />
+        </div>
+        <Table
+          dataSource={mrHistoryResults}
+          loading={mrSearchLoading}
+          rowKey="mut_no"
+          pagination={false}
+          size="small"
+          scroll={{ y: 400 }}
+          onRow={(record) => ({
+            onClick: () => {
+              handleSelectPatient(record);
+              setIsMrSearchModalOpen(false);
+            },
+            className: 'cursor-pointer hover:bg-blue-50'
+          })}
+          columns={[
+            { 
+              title: 'No Register', 
+              dataIndex: 'mut_no', 
+              width: 130,
+              render: (v) => <span className="font-mono font-bold text-blue-600">{v}</span>
+            },
+            { 
+              title: 'Tgl Masuk', 
+              dataIndex: 'tgl_masuk', 
+              width: 150,
+              render: d => dayjs(d).format('DD/MM/YYYY HH:mm') 
+            },
+            { title: 'No RM', dataIndex: 'mr_no', width: 100 },
+            { title: 'Nama Pasien', dataIndex: 'nama' },
+            { 
+              title: 'Unit/Ruang', 
+              dataIndex: 'nm_ruang',
+              render: (v) => <Tag color="orange">{v}</Tag>
+            },
+            {
+              title: 'Aksi',
+              width: 80,
+              align: 'center',
+              render: (_, record) => (
+                <Button 
+                  type="primary" 
+                  size="small" 
+                  icon={<ArrowRightOutlined />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelectPatient(record);
+                    setIsMrSearchModalOpen(false);
+                  }}
+                >Pilih</Button>
+              )
+            }
+          ]}
         />
       </Modal>
 

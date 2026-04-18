@@ -15,6 +15,7 @@ import {
   ExperimentOutlined,
   SafetyCertificateOutlined,
   AuditOutlined,
+  HistoryOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -141,6 +142,19 @@ const MainLayout = ({ children, user, onLogout }) => {
                }}
             >
                Cari Pasien
+            </Button>
+            <Button
+               icon={<HistoryOutlined />}
+               className="rounded-lg"
+               onClick={() => {
+                 if (!activePPA) {
+                   message.warning('Silakan pilih PPA terlebih dahulu sebelum mencari riwayat');
+                   return;
+                 }
+                 window.dispatchEvent(new CustomEvent('open-mr-search'));
+               }}
+            >
+               Cari No RM
             </Button>
             <Button
                icon={<TeamOutlined />}
