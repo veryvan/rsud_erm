@@ -1,0 +1,73 @@
+
+Panduan deployment telah saya sesuaikan khusus untuk lingkungan **Ubuntu + Apache**. 
+
+Beberapa poin krusial untuk server Ubuntu yang telah saya tambahkan di panduan:
+1.  **Instalasi Library**: Perintah `apt install` untuk library PHP yang wajib ada (seperti `php-intl` untuk CodeIgniter 4).
+2.  **Izin Direktori**: Perintah `chown` untuk memberikan akses tulis ke user `www-data` (user default Apache di Ubuntu) agar sistem bisa menyimpan log dan dokumentasi klinis.
+3.  **Konfigurasi VirtualHost**: Instruksi untuk mengaktifkan `AllowOverride All` agar file `.htaccess` React dapat bekerja (supaya tidak error 404 saat halaman di-refresh).
+
+Silakan buka kembali panduan yang telah diperbarui di sini:
+
+[Panduan Deployment ERM Hemodialisa (Ubuntu + Apache)](file:///C:/Users/user/.gemini/antigravity/brain/7e14596c-fe7e-418f-8048-26e88408930a/deployment_guide.md)
+
+**Tips Tambahan untuk Ubuntu:**
+*   Pastikan modul rewrite sudah aktif dengan perintah: `sudo a2enmod rewrite`.
+*   Jika database berada di server yang sama, gunakan `localhost` di `.env`, namun jika terpisah, pastikan port database (3306) sudah dibuka di firewall (UFW).
+
+Apakah Anda ingin saya membantu mengecek konfigurasi backend lainnya sebelum Anda mulai melakukan upload?
+
+Untuk server production (Ubuntu + Apache), Anda **TIDAK PERLU** menjalankan perintah `npm run dev` di server. Perintah tersebut hanya digunakan saat proses koding di komputer lokal.
+
+Berikut adalah susunan folder yang harus Anda upload dan langkah-langkahnya:
+
+### 1. Struktur Folder di Server
+Misalkan folder utama di server Anda adalah `/var/www/html/erm/`:
+
+*   **/var/www/html/erm/** (Tempat file Frontend)
+    *   `index.html` (Hasil build)
+    *   `assets/` (Hasil build: JS, CSS, gambar)
+    *   `.htaccess` (File konfigurasi redirect)
+*   **/var/www/html/erm/api/** (Tempat Backend)
+    *   `app/`, `public/`, `writable/`, `vendor/`, `spark`, `.env`, dll.
+
+---
+
+### 2. Langkah-Langkah Detil
+
+#### Langkah A: Persiapan di Komputer Lokal
+1.  Buka terminal di folder `app` (lokal).
+2.  Jalankan perintah: `npm run build`
+3.  Perintah ini akan membuat folder baru bernama `dist`.
+
+#### Langkah B: Proses Upload ke Ubuntu
+1.  **Frontend**: Upload **ISI** dari folder `app/dist/` langsung ke folder `/var/www/html/erm/` di server.
+2.  **Backend**: Upload folder `api/` ke `/var/www/html/erm/api/`.
+    *   *Tips*: Jika server Ubuntu Anda punya akses terminal, lebih cepat upload tanpa folder `vendor/`, lalu jalankan `composer install` di server. Jika tidak, upload saja seluruh folder `vendor`.
+
+#### Langkah C: Konfigurasi di Server Ubuntu
+Buka terminal server Ubuntu Anda (via SSH), lalu jalankan perintah ini untuk mengatur izin akses:
+
+```bash
+# Masuk ke folder aplikasi
+cd /var/www/html/erm
+
+# Beri izin tulis untuk log dan cache backend
+sudo chown -R www-data:www-data api/writable
+sudo chmod -R 775 api/writable
+
+# Beri izin folder upload (jika ada)
+sudo chown -R www-data:www-data api/public/uploads
+```
+
+---
+
+### Jawaban Atas Pertanyaan Anda:
+*   **Apa yang diupload?**
+    *   Frontend: Hanya isi folder `app/dist`.
+    *   Backend: Seluruh folder `api`.
+*   **Perlu jalankan `npm run dev`?**
+    *   **TIDAK.** Di server Anda hanya meletakkan file statis hasil build. Apache akan bertugas melayani file tersebut sebagai website.
+*   **Kapan pakai Terminal di Server?**
+    *   Hanya untuk setting izin folder (`chown`/`chmod`) dan restart Apache (`sudo systemctl restart apache2`) jika Anda mengubah konfigurasi VirtualHost.
+
+**PENTING**: Sebelum mengunggah, pastikan file `app/src/config.js` di lokal sudah berisi URL server utama Anda, lalu jalankan `npm run build` ulang agar hasil build-nya menggunakan lokasi server yang benar.

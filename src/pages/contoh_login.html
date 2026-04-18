@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login &mdash; Agendaris</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ===== LEFT PANEL ===== */
+        .left-panel {
+            flex: 1.1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #1e1b4b 0%, #312e81 45%, #4338ca 75%, #6366f1 100%);
+            background-size: 300% 300%;
+            animation: gradShift 10s ease infinite;
+            overflow: hidden;
+            padding: 40px;
+        }
+
+        @keyframes gradShift {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        /* Blobs */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(70px);
+            opacity: 0.3;
+        }
+
+        .b1 {
+            width: 380px;
+            height: 380px;
+            background: #818cf8;
+            top: -100px;
+            left: -100px;
+            animation: bm 12s ease-in-out infinite;
+        }
+
+        .b2 {
+            width: 280px;
+            height: 280px;
+            background: #06b6d4;
+            bottom: -60px;
+            right: -60px;
+            animation: bm 10s ease-in-out infinite reverse;
+        }
+
+        .b3 {
+            width: 200px;
+            height: 200px;
+            background: #a78bfa;
+            top: 50%;
+            left: 50%;
+            animation: bm 8s ease-in-out infinite 2s;
+        }
+
+        @keyframes bm {
+
+            0%,
+            100% {
+                transform: translate(0, 0)
+            }
+
+            50% {
+                transform: translate(25px, -25px)
+            }
+        }
+
+        /* Grid overlay */
+        .grid-ov {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background-image:
+                linear-gradient(rgba(165, 180, 252, 0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(165, 180, 252, 0.06) 1px, transparent 1px);
+            background-size: 48px 48px;
+        }
+
+        /* Stars */
+        .star {
+            position: absolute;
+            border-radius: 50%;
+            background: #fff;
+            animation: twinkle var(--d) ease-in-out infinite var(--dl);
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0;
+                transform: scale(.5)
+            }
+
+            50% {
+                opacity: .6;
+                transform: scale(1.2)
+            }
+        }
+
+        .left-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        /* SVG illustration float */
+        .illus-wrap {
+            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.4));
+            animation: floatY 5s ease-in-out infinite;
+        }
+
+        @keyframes floatY {
+
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-14px)
+            }
+        }
+
+        /* Badges floating */
+        .badge-float {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            z-index: 3;
+            animation: badgeFloat var(--bd) ease-in-out infinite var(--bdl);
+        }
+
+        @keyframes badgeFloat {
+
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-8px)
+            }
+        }
+
+        /* ===== RIGHT PANEL ===== */
+        .right-panel {
+            width: 400px;
+            flex-shrink: 0;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 36px;
+            position: relative;
+            box-shadow: -8px 0 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .right-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -1px;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #6366f1, #8b5cf6, #06b6d4);
+        }
+
+        /* Brand */
+        .brand-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 14px;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+        }
+
+        /* Input */
+        .field-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .input-wrap {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .inp {
+            width: 100%;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px 36px 10px 38px;
+            font-size: 14px;
+            color: #1e293b;
+            background: #f8fafc;
+            transition: all 0.2s;
+        }
+
+        .inp:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+        }
+
+        .inp-icon-l {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .inp-icon-r {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .inp-icon-r:hover {
+            color: #6366f1;
+        }
+
+        /* Button */
+        .btn-login {
+            width: 100%;
+            padding: 11px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+            transition: all 0.2s;
+            margin-top: 4px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.45);
+        }
+
+        /* Alert */
+        .alert-err {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 13px;
+            margin-bottom: 18px;
+            width: 100%;
+        }
+
+        @media (max-width: 700px) {
+            .left-panel {
+                display: none;
+            }
+
+            .right-panel {
+                width: 100%;
+                box-shadow: none;
+            }
+
+            .right-panel::before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== LEFT PANEL ===== -->
+    <div class="left-panel">
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
+        <div class="blob b3"></div>
+        <div class="grid-ov"></div>
+        <div id="starsContainer"></div>
+
+        <!-- Badge: MOU Alarm -->
+        <div class="badge-float" style="top:12%;left:6%;--bd:6s;--bdl:0s;">
+            <i class="fas fa-bell" style="color:#fbbf24;"></i>
+            <span>Alarm MOU Aktif</span>
+        </div>
+
+        <!-- Badge: Surat -->
+        <div class="badge-float" style="bottom:16%;right:8%;--bd:7s;--bdl:-2s;">
+            <i class="fas fa-envelope-open-text" style="color:#34d399;"></i>
+            <span>Surat Masuk</span>
+        </div>
+
+        <!-- Badge: Agenda -->
+        <div class="badge-float" style="bottom:30%;left:5%;--bd:5.5s;--bdl:-3s;">
+            <i class="fas fa-calendar-check" style="color:#60a5fa;"></i>
+            <span>Agenda Rapat</span>
+        </div>
+
+        <!-- SVG Illustration -->
+        <div class="left-content">
+            <div class="illus-wrap" style="margin-bottom:28px;">
+                <svg viewBox="0 0 340 280" width="340" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+                    <!-- Shadow -->
+                    <ellipse cx="170" cy="268" rx="110" ry="9" fill="rgba(0,0,0,0.25)" />
+
+                    <!-- ---- BACK DOCUMENTS ---- -->
+                    <!-- Doc 3 (back) -->
+                    <rect x="52" y="30" width="145" height="185" rx="10" fill="#c7d2fe" transform="rotate(-8 52 30)"
+                        opacity="0.6" />
+                    <!-- Doc 2 -->
+                    <rect x="148" y="26" width="145" height="185" rx="10" fill="#ddd6fe" transform="rotate(6 148 26)"
+                        opacity="0.6" />
+
+                    <!-- ---- MAIN PLANNER BOOK ---- -->
+                    <!-- Book cover shadow -->
+                    <rect x="54" y="44" width="232" height="205" rx="12" fill="rgba(0,0,0,0.15)"
+                        transform="translate(4,6)" />
+
+                    <!-- Book cover left (back) -->
+                    <rect x="54" y="44" width="232" height="205" rx="12" fill="#4f46e5" />
+
+                    <!-- Book pages edge -->
+                    <rect x="60" y="50" width="220" height="193" rx="10" fill="#e0e7ff" />
+
+                    <!-- Spine -->
+                    <rect x="163" y="50" width="14" height="193" fill="#4338ca" />
+
+                    <!-- LEFT PAGE (Calendar) -->
+                    <rect x="60" y="50" width="103" height="193" rx="10" fill="white" />
+
+                    <!-- Left page header -->
+                    <rect x="64" y="54" width="95" height="28" rx="6" fill="#6366f1" />
+                    <!-- Month text represented as lines -->
+                    <rect x="80" y="63" width="60" height="6" rx="3" fill="rgba(255,255,255,0.9)" />
+                    <rect x="90" y="72" width="40" height="4" rx="2" fill="rgba(255,255,255,0.5)" />
+
+                    <!-- Calendar day headers -->
+                    <?php
+                $days = ['M','S','R','K','J','S','M'];
+                foreach($days as $di => $d): $x = 67 + $di*13; ?>
+                    <text x="<?= $x ?>" y="98" fill="#6366f1" font-size="6" font-weight="bold" font-family="Arial">
+                        <?= $d ?>
+                    </text>
+                    <?php endforeach; ?>
+
+                    <!-- Calendar grid cells -->
+                    <?php
+                $num = 1;
+                for($row=0; $row<5; $row++): for($col=0; $col<7; $col++): if($num>31) break 2;
+                    $cx = 67 + $col*13;
+                    $cy = 106 + $row*15;
+                    $isToday = ($num == 16);
+                    $isWeekend = ($col >= 5);
+                    $hasEvent = in_array($num, [3,8,14,21,27]);
+                ?>
+                    <?php if($isToday): ?>
+                    <rect x="<?= $cx-4 ?>" y="<?= $cy-6 ?>" width="11" height="11" rx="3" fill="#6366f1" />
+                    <text x="<?= $cx ?>" y="<?= $cy+1 ?>" fill="white" font-size="6" font-weight="bold"
+                        text-anchor="middle" font-family="Arial">
+                        <?= $num ?>
+                    </text>
+                    <?php elseif($hasEvent): ?>
+                    <text x="<?= $cx ?>" y="<?= $cy+1 ?>" fill="#7c3aed" font-size="6" font-weight="bold"
+                        text-anchor="middle" font-family="Arial">
+                        <?= $num ?>
+                    </text>
+                    <circle cx="<?= $cx ?>" cy="<?= $cy+4 ?>" r="1.5" fill="#7c3aed" />
+                    <?php else: ?>
+                    <text x="<?= $cx ?>" y="<?= $cy+1 ?>" fill="<?= $isWeekend ? '#f87171' : '#475569' ?>" font-size="6"
+                        text-anchor="middle" font-family="Arial">
+                        <?= $num ?>
+                    </text>
+                    <?php endif; ?>
+                    <?php $num++; endfor; endfor; ?>
+
+                    <!-- RIGHT PAGE (Task List) -->
+                    <rect x="177" y="50" width="103" height="193" rx="10" fill="#fafafa" />
+
+                    <!-- Right page title -->
+                    <rect x="181" y="58" width="95" height="5" rx="2.5" fill="#6366f1" />
+                    <rect x="181" y="67" width="70" height="4" rx="2" fill="#c7d2fe" />
+
+                    <!-- Task items -->
+                    <?php
+                $tasks = [
+                    ['done'=>true,  'w'=>72, 'color'=>'#6366f1'],
+                    ['done'=>true,  'w'=>60, 'color'=>'#6366f1'],
+                    ['done'=>false, 'w'=>80, 'color'=>'#94a3b8'],
+                    ['done'=>false, 'w'=>55, 'color'=>'#94a3b8'],
+                    ['done'=>true,  'w'=>68, 'color'=>'#6366f1'],
+                    ['done'=>false, 'w'=>75, 'color'=>'#94a3b8'],
+                    ['done'=>false, 'w'=>50, 'color'=>'#94a3b8'],
+                    ['done'=>true,  'w'=>62, 'color'=>'#6366f1'],
+                ];
+                foreach($tasks as $ti => $t):
+                    $ty = 84 + $ti * 16;
+                ?>
+                    <!-- Checkbox -->
+                    <rect x="181" y="<?= $ty ?>" width="8" height="8" rx="2"
+                        fill="<?= $t['done'] ? '#6366f1' : 'white' ?>"
+                        stroke="<?= $t['done'] ? '#6366f1' : '#cbd5e1' ?>" stroke-width="1" />
+                    <?php if($t['done']): ?>
+                    <path d="M183 <?= $ty+4 ?> l2 2 l3 -3" stroke="white" stroke-width="1.2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <?php endif; ?>
+                    <!-- Task line -->
+                    <rect x="193" y="<?= $ty+2 ?>" width="<?= $t['w'] ?>" height="4" rx="2" fill="<?= $t['color'] ?>"
+                        opacity="<?= $t['done'] ? '0.9' : '0.4' ?>" />
+                    <?php endforeach; ?>
+
+                    <!-- Bookmark ribbon -->
+                    <path d="M264 44 L276 44 L276 68 L270 62 L264 68 Z" fill="#f59e0b" />
+
+                    <!-- Spiral binding circles -->
+                    <?php for($i=0; $i<10; $i++): $sy = 62 + $i*18; ?>
+                    <circle cx="170" cy="<?= $sy ?>" r="5" fill="white" stroke="#c7d2fe" stroke-width="1.5" />
+                    <circle cx="170" cy="<?= $sy ?>" r="2.5" fill="#e0e7ff" />
+                    <?php endfor; ?>
+
+                    <!-- ---- FLOATING ELEMENTS ---- -->
+
+                    <!-- Clock -->
+                    <circle cx="44" cy="90" r="20" fill="white" opacity="0.95" filter="url(#shadow)" />
+                    <circle cx="44" cy="90" r="20" fill="none" stroke="#6366f1" stroke-width="1.5" />
+                    <circle cx="44" cy="90" r="1.5" fill="#6366f1" />
+                    <line x1="44" y1="90" x2="44" y2="76" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" />
+                    <line x1="44" y1="90" x2="52" y2="90" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round" />
+
+                    <!-- Pen -->
+                    <g transform="translate(285,50) rotate(35)">
+                        <rect x="0" y="0" width="8" height="38" rx="2" fill="#818cf8" />
+                        <polygon points="0,38 8,38 4,50" fill="#4f46e5" />
+                        <rect x="0" y="0" width="8" height="7" rx="2" fill="#fbbf24" />
+                        <line x1="4" y1="48" x2="4" y2="52" stroke="#1e293b" stroke-width="1" />
+                    </g>
+
+                    <!-- Star sparkles -->
+                    <g fill="#fbbf24" opacity="0.85">
+                        <polygon
+                            points="310,40 311.5,44 316,44 312.5,46.5 314,51 310,48.5 306,51 307.5,46.5 304,44 308.5,44"
+                            transform="scale(0.6) translate(210,30)" />
+                        <polygon
+                            points="310,40 311.5,44 316,44 312.5,46.5 314,51 310,48.5 306,51 307.5,46.5 304,44 308.5,44"
+                            transform="scale(0.4) translate(60,360)" />
+                    </g>
+
+                    <!-- Notification dot -->
+                    <circle cx="295" cy="44" r="8" fill="#ef4444" />
+                    <text x="295" y="48" fill="white" font-size="8" font-weight="bold" text-anchor="middle"
+                        font-family="Arial">3</text>
+
+                    <defs>
+                        <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+                            <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="rgba(0,0,0,0.15)" />
+                        </filter>
+                    </defs>
+                </svg>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:10px;">
+                <img src="<?php echo base_url('assets/images/logo.png'); ?>" alt="Logo RSUD"
+                    style="height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4)) brightness(1.05);">
+                <h2 style="color:white;font-size:22px;font-weight:800;letter-spacing:-0.3px;line-height:1.2;">
+                    Sistem Agendaris
+                </h2>
+            </div>
+            <p style="color:rgba(199,210,254,0.8);font-size:13px;line-height:1.6;max-width:280px;">
+                Kelola agenda, surat, MOU, dan dokumen RS secara terpadu dan efisien.
+            </p>
+
+            <!-- Feature pills -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:20px;">
+                <span
+                    style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.85);font-size:11px;padding:4px 12px;border-radius:999px;">&#128197;
+                    Kalender Agenda</span>
+                <span
+                    style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.85);font-size:11px;padding:4px 12px;border-radius:999px;">&#128196;
+                    Surat & MOU</span>
+                <span
+                    style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.85);font-size:11px;padding:4px 12px;border-radius:999px;">&#128276;
+                    Alarm Otomatis</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== RIGHT PANEL ===== -->
+    <div class="right-panel">
+        <div style="width:100%;max-width:300px;">
+
+            <!-- Brand -->
+            <div style="text-align:center;margin-bottom:24px;">
+                <img src="<?php echo base_url('assets/images/logo.png'); ?>" alt="Logo RSUD"
+                    style="height:72px;width:auto;margin:0 auto 10px;display:block;object-fit:contain;">
+                <h1 style="font-size:16px;font-weight:800;color:#1e293b;line-height:1.3;">RSUD dr. Loekmono Hadi Kudus
+                </h1>
+                <p style="font-size:11px;color:#94a3b8;margin-top:4px;">Silakan masuk ke akun Anda</p>
+                <div
+                    style="width:36px;height:3px;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:99px;margin:10px auto 0;">
+                </div>
+            </div>
+
+            <!-- Error -->
+            <?php if($this->session->flashdata('error')): ?>
+            <div class="alert-err">
+                <i class="fas fa-exclamation-circle" style="flex-shrink:0;"></i>
+                <span>
+                    <?php echo $this->session->flashdata('error'); ?>
+                </span>
+            </div>
+            <?php endif; ?>
+
+            <!-- Form -->
+            <form action="<?php echo site_url('auth/process'); ?>" method="POST">
+
+                <div class="input-wrap">
+                    <label class="field-label">Username</label>
+                    <i class="fas fa-user inp-icon-l"></i>
+                    <input type="text" name="nuser" class="inp" placeholder="Masukkan username" required
+                        autocomplete="username">
+                </div>
+
+                <div class="input-wrap">
+                    <label class="field-label">Password</label>
+                    <i class="fas fa-lock inp-icon-l"></i>
+                    <input type="password" name="xpassword" id="pwdField" class="inp" placeholder="Masukkan password"
+                        required autocomplete="current-password">
+                    <button type="button" class="inp-icon-r" onclick="togglePwd()" tabindex="-1">
+                        <i id="eyeIcon" class="fas fa-eye"></i>
+                    </button>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt" style="margin-right:8px;"></i>Masuk ke Sistem
+                </button>
+            </form>
+
+            <p style="text-align:center;font-size:11px;color:#cbd5e1;margin-top:24px;">
+                RSUD dr. Loekmono Hadi &copy;
+                <?php echo date('Y'); ?>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Bintang di panel kiri
+        const sc = document.getElementById('starsContainer');
+        for (let i = 0; i < 60; i++) {
+            const s = document.createElement('div');
+            s.className = 'star';
+            const sz = Math.random() * 2 + 1;
+            s.style.cssText = `
+            width:${sz}px;height:${sz}px;
+            left:${Math.random() * 100}%;
+            top:${Math.random() * 100}%;
+            --d:${(2 + Math.random() * 4).toFixed(1)}s;
+            --dl:${(Math.random() * 5).toFixed(1)}s;
+            position:absolute;
+        `;
+            sc.appendChild(s);
+        }
+
+        // Toggle password
+        function togglePwd() {
+            const f = document.getElementById('pwdField');
+            const i = document.getElementById('eyeIcon');
+            if (f.type === 'password') { f.type = 'text'; i.className = 'fas fa-eye-slash'; }
+            else { f.type = 'password'; i.className = 'fas fa-eye'; }
+        }
+    </script>
+</body>
+
+</html>

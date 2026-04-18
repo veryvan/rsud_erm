@@ -10,12 +10,17 @@ import {
   AlertOutlined,
   SearchOutlined,
   TeamOutlined,
+  SettingOutlined,
+  MedicineBoxOutlined,
+  ExperimentOutlined,
+  SafetyCertificateOutlined,
+  AuditOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const { Header, Sider, Content } = Layout;
 
-const MainLayout = ({ children }) => {
+const MainLayout = ({ children, user, onLogout }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [activePPA, setActivePPA] = useState(null);
   const { message } = App.useApp();
@@ -57,7 +62,12 @@ const MainLayout = ({ children }) => {
           theme="light"
           mode="inline"
           defaultSelectedKeys={[location.pathname]}
-          onClick={({ key }) => navigate(key)}
+          onClick={({ key }) => {
+            if (key === '/') {
+              window.dispatchEvent(new CustomEvent('reset-dashboard'));
+            }
+            navigate(key);
+          }}
           style={{ border: 'none', paddingTop: '16px' }}
           items={[
             {
@@ -65,13 +75,38 @@ const MainLayout = ({ children }) => {
               icon: <DashboardOutlined />,
               label: 'Dashboard HD',
             },
-            {
-              key: '/pasien',
-              icon: <UserOutlined />,
-              label: 'Cari Pasien',
+            user?.role === 'admin' && {
+              key: '/users',
+              icon: <SettingOutlined />,
+              label: 'Manajemen User',
             },
-          ]}
+          ].filter(Boolean)}
         />
+        {location.pathname === '/' && (
+          <>
+            <div style={{ padding: '24px 16px 8px', fontSize: '11px', fontWeight: 'bold', color: '#999', textTransform: 'uppercase', letterSpacing: '1px' }}>
+              {!collapsed ? 'Navigasi Cepat (Tab)' : 'TAB'}
+            </div>
+            <Menu
+              theme="light"
+              mode="inline"
+              selectable={false}
+              style={{ border: 'none' }}
+              onClick={({ key }) => {
+                window.dispatchEvent(new CustomEvent('set-active-tab', { detail: key }));
+              }}
+              items={[
+                { key: '3', icon: <FileTextOutlined style={{color: '#2563eb'}} />, label: 'SOAP / CPPT' },
+                { key: '2', icon: <MedicineBoxOutlined style={{color: '#059669'}} />, label: 'Riwayat CPPT' },
+                { key: '4', icon: <LineChartOutlined style={{color: '#d97706'}} />, label: 'EWS' },
+                { key: 'monitoring', icon: <ExperimentOutlined style={{color: '#7c3aed'}} />, label: 'Monitoring' },
+                { key: 'tindakan_transfusi', icon: <AuditOutlined style={{color: '#8b5cf6'}} />, label: 'Tindakan & Transfusi' },
+                { key: 'transfer', icon: <SafetyCertificateOutlined style={{color: '#dc2626'}} />, label: 'Transfer Internal' },
+                { key: 'order_lab', icon: <ExperimentOutlined style={{color: '#0891b2'}} />, label: 'Order Laborat' },
+              ]}
+            />
+          </>
+        )}
       </Sider>
       <Layout style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
         <Header
@@ -134,22 +169,26 @@ const MainLayout = ({ children }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
              <div style={{ textAlign: 'right', lineHeight: '1.2' }}>
                <div style={{ fontSize: '14px', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                 dr. John Doe, Sp.PD-KGH
+                 {user?.nama || 'Pengguna'}
                </div>
-               <div style={{ fontSize: '12px', color: '#666' }}>Spesialis Penyakit Dalam</div>
+               <div style={{ fontSize: '11px', color: '#666', display: 'flex', justifyContent: 'flex-end' }}>
+                 <Button type="link" size="small" onClick={onLogout} style={{ padding: 0, height: 'auto', fontSize: '10px' }} danger>
+                   LOGOUT
+                 </Button>
+               </div>
              </div>
              <div style={{ 
                width: 40, 
                height: 40, 
-               backgroundColor: '#eef2ff', 
+               backgroundColor: '#6d28d9', 
                borderRadius: '50%', 
                display: 'flex', 
                alignItems: 'center', 
                justifyContent: 'center', 
-               color: '#6d28d9', 
+               color: 'white', 
                fontWeight: 'bold',
                flexShrink: 0
-             }}>JD</div>
+             }}>{user?.nama?.charAt(0) || 'U'}</div>
           </div>
         </Header>
         <Content style={{ margin: '24px', background: 'transparent', minHeight: 'calc(100vh - 112px)' }}>
